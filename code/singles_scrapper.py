@@ -140,8 +140,12 @@ def scrape_multiple_pages(base_url, start_page, end_page, min_nb_ratings, min_ra
         url = f'{base_url}{page_num}/'
         
         # Make a GET request with the User-Agent header
-        response = requests.get(url, headers=headers)
-
+        print(f"Fetching page {url}")
+        try:
+            response = requests.get(url, headers=headers, timeout=10)
+        except Exception as e:
+            print(f"Error: {e}")
+            
         if response.status_code == 200:
             # Parse the HTML content with BeautifulSoup
             soup = BeautifulSoup(response.content, 'html.parser')
