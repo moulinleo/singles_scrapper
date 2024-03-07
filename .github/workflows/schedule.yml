@@ -43,5 +43,12 @@ jobs:
           PYTHONUNBUFFERED: 1
         continue-on-error: true  # Continue even if the script fails
 
+      - name: Debug information
+        run: |
+          echo "SPOTIPY_CLIENT_ID: $SPOTIPY_CLIENT_ID"
+          echo "SPOTIPY_CLIENT_SECRET: $SPOTIPY_CLIENT_SECRET"
+          echo "SPOTIPY_USERNAME: $SPOTIPY_USERNAME"
+          echo "SPOTIPY_PLAYLIST_URI: $SPOTIPY_PLAYLIST_URI"
+
     outputs:
       verbosity: 'normal'  # or 'debug'

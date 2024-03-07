@@ -195,7 +195,7 @@ def add_songs_to_playlist(singles_df, SPOTIPY_USERNAME, SPOTIPY_PLAYLIST_URI, SP
                                                    client_id=SPOTIPY_CLIENT_ID, client_secret=SPOTIPY_CLIENT_SECRET, 
                                                    redirect_uri='http://localhost:8080'))
 
-    
+    print("Access Token:", sp.auth_manager.get_access_token())
     # Get the existing tracks in the playlist
     print('getting existing tracks...')
     existing_tracks = get_all_playlist_tracks(sp, SPOTIPY_PLAYLIST_URI)
@@ -241,8 +241,6 @@ def delete_all_tracks_from_playlist(SPOTIPY_PLAYLIST_URI, SPOTIPY_USERNAME, SPOT
     Returns:
     None
     """
-    
-    
 
     sp = spotipy.Spotify(auth_manager=SpotifyOAuth(username=SPOTIPY_USERNAME, scope="playlist-modify-private",
                                                    client_id=SPOTIPY_CLIENT_ID, client_secret=SPOTIPY_CLIENT_SECRET, 
