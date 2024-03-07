@@ -39,3 +39,9 @@ jobs:
 
       - name: Run Script
         run: python ./code/singles_scrapper.py
+        env:
+          PYTHONUNBUFFERED: 1
+        continue-on-error: true  # Continue even if the script fails
+
+    outputs:
+      verbosity: 'normal'  # or 'debug'
