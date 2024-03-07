@@ -284,7 +284,7 @@ def get_all_playlist_tracks(sp, SPOTIPY_PLAYLIST_URI):
 
 # Specify the range of pages you want to scrape
 start_page = 1
-end_page = 30  # Adjust this based on the total number of pages you want to scrape
+end_page = 20  # Adjust this based on the total number of pages you want to scrape
 
 min_nb_ratings = 7
 min_rating = 76
@@ -292,9 +292,12 @@ min_weighted = 7.5
 
 # Call the function to scrape multiple page: Singles
 base_url = 'https://www.albumoftheyear.org/releases/singles/'
+
+
+print('1 ****** scrapping singles...')
 singles_df = scrape_multiple_pages(base_url,start_page, end_page, min_nb_ratings, min_rating, min_weighted)
 
-print('1 ****** loading env variables...')
+print('2 ****** loading env variables...')
 # Load environment variables from .env
 from dotenv import load_dotenv
 load_dotenv()
@@ -308,7 +311,7 @@ print("SPOTIPY_CLIENT_SECRET:", SPOTIPY_CLIENT_SECRET)
 print("SPOTIPY_USERNAME:", SPOTIPY_USERNAME)
 print("SPOTIPY_PLAYLIST_URI:", SPOTIPY_PLAYLIST_URI)
 
-print('2 ***** adding songs to playlist...')
+print('3 ***** adding songs to playlist...')
 add_songs_to_playlist(singles_df, SPOTIPY_USERNAME, SPOTIPY_PLAYLIST_URI, SPOTIPY_CLIENT_ID, SPOTIPY_CLIENT_SECRET)
 
 print(singles_df.head(30))
