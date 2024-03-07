@@ -48,6 +48,7 @@ jobs:
         run: python ./code/singles_scrapper.py
         env:
           PYTHONUNBUFFERED: 1
+          SPOTIPY_CACHE_PATH: ${{ env.SPOTIPY_CACHE_PATH }}
         continue-on-error: true  # Continue even if the script fails
 
       
