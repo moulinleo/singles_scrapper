@@ -182,17 +182,20 @@ def add_songs_to_playlist(singles_df, SPOTIPY_USERNAME, SPOTIPY_PLAYLIST_URI, SP
     """
     
     # Remove existing cached token
+    print('prompting for user token...')
     util.prompt_for_user_token(SPOTIPY_USERNAME, scope="playlist-modify-private",
                             client_id=SPOTIPY_CLIENT_ID, client_secret=SPOTIPY_CLIENT_SECRET,
                             redirect_uri='http://localhost:8080', cache_path=False)
     
     # Set up Spotify API authentication
+    print('setting up spotify api...')
     sp = spotipy.Spotify(auth_manager=SpotifyOAuth(username=SPOTIPY_USERNAME, scope="playlist-modify-private",
                                                    client_id=SPOTIPY_CLIENT_ID, client_secret=SPOTIPY_CLIENT_SECRET, 
                                                    redirect_uri='http://localhost:8080'))
 
     
     # Get the existing tracks in the playlist
+    print('getting existing tracks...')
     existing_tracks = get_all_playlist_tracks(sp, SPOTIPY_PLAYLIST_URI)
     
     # Extract track URIs
@@ -315,6 +318,11 @@ SPOTIPY_CLIENT_ID = os.getenv('SPOTIPY_CLIENT_ID')
 SPOTIPY_CLIENT_SECRET = os.getenv('SPOTIPY_CLIENT_SECRET')
 SPOTIPY_USERNAME = os.getenv('SPOTIPY_USERNAME')
 SPOTIPY_PLAYLIST_URI = os.getenv('SPOTIPY_PLAYLIST_URI')
+
+print(f"SPOTIPY_CLIENT_ID: {SPOTIPY_CLIENT_ID}")
+print(f"SPOTIPY_CLIENT_SECRET: {SPOTIPY_CLIENT_SECRET}")
+print(f"SPOTIPY_USERNAME: {SPOTIPY_USERNAME}")
+print(f"SPOTIPY_PLAYLIST_URI: {SPOTIPY_PLAYLIST_URI}")
 
 
 add_songs_to_playlist(singles_df, SPOTIPY_USERNAME, SPOTIPY_PLAYLIST_URI, SPOTIPY_CLIENT_ID, SPOTIPY_CLIENT_SECRET)
