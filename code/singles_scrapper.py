@@ -255,17 +255,30 @@ def get_all_playlist_tracks(sp, SPOTIPY_PLAYLIST_URI):
         list: A list of dictionaries representing the tracks in the playlist.
     """
     all_tracks = []
+    
+    print(f"Playlist URI: {SPOTIPY_PLAYLIST_URI}")
 
     # Initial request
-    response = sp.playlist_tracks(SPOTIPY_PLAYLIST_URI, limit=50)
-    all_tracks.extend(response['items'])
-
-    # Continue fetching next pages
-    while response['next']:
-        response = sp.next(response)
+    try:
+        response = sp.playlist_tracks(SPOTIPY_PLAYLIST_URI, limit=50)
         all_tracks.extend(response['items'])
 
-    return all_tracks
+        # Continue fetching next pages
+        while response['next']:
+            response = sp.next(response)
+            all_tracks.extend(response['items'])
+            
+        return all_tracks
+    
+    except spotipy.SpotifyException as e:
+        if e.http_status == 404:
+            print(f"Playlist not found: {SPOTIPY_PLAYLIST_URI}")
+        else:
+            print(f"Error: {e}")
+            
+        return []
+
+    
 
 # Specify the range of pages you want to scrape
 start_page = 1
