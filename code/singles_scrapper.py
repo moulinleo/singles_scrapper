@@ -4,6 +4,7 @@ import os
 import requests
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
+import spotipy.util as util
 
 
 def weighted_average_rating(avg_rating, num_votes, global_avg, smoothing_factor=10):
@@ -139,7 +140,6 @@ def scrape_multiple_pages(base_url, start_page, end_page, min_nb_ratings, min_ra
         url = f'{base_url}{page_num}/'
         
         # Make a GET request with the User-Agent header
-        print(f"Fetching page {url}")
         try:
             response = requests.get(url, headers=headers, timeout=10)
         except Exception as e:
@@ -180,6 +180,12 @@ def add_songs_to_playlist(singles_df, SPOTIPY_USERNAME, SPOTIPY_PLAYLIST_URI, SP
     Returns:
         None
     """
+    
+    # Remove existing cached token
+    util.prompt_for_user_token(SPOTIPY_USERNAME, scope="playlist-modify-private",
+                            client_id=SPOTIPY_CLIENT_ID, client_secret=SPOTIPY_CLIENT_SECRET,
+                            redirect_uri='http://localhost:8080', cache_path=False)
+    
     # Set up Spotify API authentication
     sp = spotipy.Spotify(auth_manager=SpotifyOAuth(username=SPOTIPY_USERNAME, scope="playlist-modify-private",
                                                    client_id=SPOTIPY_CLIENT_ID, client_secret=SPOTIPY_CLIENT_SECRET, 
@@ -230,6 +236,8 @@ def delete_all_tracks_from_playlist(SPOTIPY_PLAYLIST_URI, SPOTIPY_USERNAME, SPOT
     Returns:
     None
     """
+    
+    
 
     sp = spotipy.Spotify(auth_manager=SpotifyOAuth(username=SPOTIPY_USERNAME, scope="playlist-modify-private",
                                                    client_id=SPOTIPY_CLIENT_ID, client_secret=SPOTIPY_CLIENT_SECRET, 
@@ -307,6 +315,7 @@ SPOTIPY_CLIENT_ID = os.getenv('SPOTIPY_CLIENT_ID')
 SPOTIPY_CLIENT_SECRET = os.getenv('SPOTIPY_CLIENT_SECRET')
 SPOTIPY_USERNAME = os.getenv('SPOTIPY_USERNAME')
 SPOTIPY_PLAYLIST_URI = os.getenv('SPOTIPY_PLAYLIST_URI')
+
 
 add_songs_to_playlist(singles_df, SPOTIPY_USERNAME, SPOTIPY_PLAYLIST_URI, SPOTIPY_CLIENT_ID, SPOTIPY_CLIENT_SECRET)
 
