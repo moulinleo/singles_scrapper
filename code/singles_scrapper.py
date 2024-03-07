@@ -151,9 +151,11 @@ def scrape_multiple_pages(base_url, start_page, end_page, min_nb_ratings, min_ra
 
             # Append the current DataFrame to the final DataFrame
             final_df = pd.concat([final_df, df], ignore_index=True)
+            print(f"Page {page_num} scraped successfully.")
         else:
             print(f"Failed to fetch page {url}. Status code: {response.status_code}")
 
+    print(f"Scraping complete. {final_df.shape[0]} records scraped.")
     return final_df
 
 
@@ -175,21 +177,18 @@ def add_songs_to_playlist(singles_df, SPOTIPY_USERNAME, SPOTIPY_PLAYLIST_URI, SP
     Returns:
         None
     """
-    print('setting up the Spotify API authentication...')
     # Set up Spotify API authentication
     sp = spotipy.Spotify(auth_manager=SpotifyOAuth(username=SPOTIPY_USERNAME, scope="playlist-modify-private",
                                                    client_id=SPOTIPY_CLIENT_ID, client_secret=SPOTIPY_CLIENT_SECRET, 
                                                    redirect_uri='http://localhost:8080'))
 
     
-    print('getting existing tracks...')
     # Get the existing tracks in the playlist
     existing_tracks = get_all_playlist_tracks(sp, SPOTIPY_PLAYLIST_URI)
     
     # Extract track URIs
     existing_track_uris = set(track['track']['uri'] for track in existing_tracks)
     
-    print('iterating through the DataFrame...')
     # Iterate through the DataFrame and add new songs to the playlist
     for _, row in singles_df.iterrows():
         artist = row['Artist']
@@ -306,12 +305,6 @@ SPOTIPY_CLIENT_SECRET = os.getenv('SPOTIPY_CLIENT_SECRET')
 SPOTIPY_USERNAME = os.getenv('SPOTIPY_USERNAME')
 SPOTIPY_PLAYLIST_URI = os.getenv('SPOTIPY_PLAYLIST_URI')
 
-print("SPOTIPY_CLIENT_ID:", SPOTIPY_CLIENT_ID)
-print("SPOTIPY_CLIENT_SECRET:", SPOTIPY_CLIENT_SECRET)
-print("SPOTIPY_USERNAME:", SPOTIPY_USERNAME)
-print("SPOTIPY_PLAYLIST_URI:", SPOTIPY_PLAYLIST_URI)
-
-print('3 ***** adding songs to playlist...')
 add_songs_to_playlist(singles_df, SPOTIPY_USERNAME, SPOTIPY_PLAYLIST_URI, SPOTIPY_CLIENT_ID, SPOTIPY_CLIENT_SECRET)
 
 print(singles_df.head(30))
