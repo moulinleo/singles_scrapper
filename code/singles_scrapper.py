@@ -155,7 +155,6 @@ def scrape_multiple_pages(base_url, start_page, end_page, min_nb_ratings, min_ra
 
             # Append the current DataFrame to the final DataFrame
             final_df = pd.concat([final_df, df], ignore_index=True)
-            print(f"Page {page_num} scraped successfully.")
         else:
             print(f"Failed to fetch page {url}. Status code: {response.status_code}")
 
@@ -167,7 +166,7 @@ def scrape_multiple_pages(base_url, start_page, end_page, min_nb_ratings, min_ra
 # =-----  Create a Spotify playlist ---------
 
 
-def add_songs_to_playlist(singles_df, SPOTIPY_USERNAME, SPOTIPY_PLAYLIST_URI, SPOTIPY_CLIENT_ID, SPOTIPY_CLIENT_SECRET):
+def add_songs_to_playlist(singles_df, SPOTIPY_USERNAME, SPOTIPY_PLAYLIST_URI, SPOTIPY_CLIENT_ID, SPOTIPY_CLIENT_SECRET, cache_path):
     """
     Adds songs from a DataFrame to a Spotify playlist.
 
@@ -193,7 +192,7 @@ def add_songs_to_playlist(singles_df, SPOTIPY_USERNAME, SPOTIPY_PLAYLIST_URI, SP
     print('setting up spotify api...')
     sp = spotipy.Spotify(auth_manager=SpotifyOAuth(username=SPOTIPY_USERNAME, scope="playlist-modify-private",
                                                    client_id=SPOTIPY_CLIENT_ID, client_secret=SPOTIPY_CLIENT_SECRET, 
-                                                   redirect_uri='http://localhost:8080'))
+                                                   redirect_uri='http://localhost:8080', cache_path=cache_path))
  
     access_token = sp.auth_manager.get_cached_token()
     print("Access Token:", access_token)
@@ -316,6 +315,10 @@ print('2 ****** loading env variables...')
 # Load environment variables from .env
 from dotenv import load_dotenv
 load_dotenv()
+
+# Get the cache path from the environment variable or use a default path
+cache_path = os.getenv('SPOTIPY_CACHE_PATH', '.cache-username')
+
 SPOTIPY_CLIENT_ID = os.getenv('SPOTIPY_CLIENT_ID')
 SPOTIPY_CLIENT_SECRET = os.getenv('SPOTIPY_CLIENT_SECRET')
 SPOTIPY_USERNAME = os.getenv('SPOTIPY_USERNAME')
@@ -327,6 +330,6 @@ print(f"SPOTIPY_USERNAME: {SPOTIPY_USERNAME}")
 print(f"SPOTIPY_PLAYLIST_URI: {SPOTIPY_PLAYLIST_URI}")
 
 
-add_songs_to_playlist(singles_df, SPOTIPY_USERNAME, SPOTIPY_PLAYLIST_URI, SPOTIPY_CLIENT_ID, SPOTIPY_CLIENT_SECRET)
+add_songs_to_playlist(singles_df, SPOTIPY_USERNAME, SPOTIPY_PLAYLIST_URI, SPOTIPY_CLIENT_ID, SPOTIPY_CLIENT_SECRET, cache_path)
 
 print(singles_df.head(30))
