@@ -1,7 +1,6 @@
 from bs4 import BeautifulSoup
 import pandas as pd
 import os 
-from tqdm import tqdm
 import requests
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
@@ -135,7 +134,7 @@ def scrape_multiple_pages(base_url, start_page, end_page, min_nb_ratings, min_ra
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
 
-    for page_num in tqdm(range(start_page, end_page + 1)):
+    for page_num in range(start_page, end_page + 1):
             
         url = f'{base_url}{page_num}/'
         
