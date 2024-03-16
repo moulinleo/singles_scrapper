@@ -84,6 +84,8 @@ def get_dataframe_from_soup(soup, min_nb_ratings, min_rating, min_weighted, base
         # No votes
         if len_votes == 0:
             continue
+        if album_block.find('div', class_='date') is None:
+            continue
         date = album_block.find('div', class_='date').text
         artist = album_block.find('div', class_='artistTitle').text
         album_title = album_block.find('div', class_='albumTitle').text
@@ -276,7 +278,7 @@ def add_songs_to_playlist(singles_df, SPOTIPY_USERNAME, SPOTIPY_PLAYLIST_URI, SP
     # Iterate through the DataFrame and add new songs to the playlist
     for _, row in singles_df.iterrows():
         artist = row['Artist']
-        track_name = row['Album']
+        track_name = row['Title']
         
          # Search for the track on Spotify
         results = sp.search(q=f"artist:{artist} track:{track_name}", type='track', limit=1)
@@ -301,6 +303,7 @@ def add_songs_to_playlist(singles_df, SPOTIPY_USERNAME, SPOTIPY_PLAYLIST_URI, SP
             singles_df_copy.drop(index=row.name, inplace=True)
             print(f"Could not find '{artist} - {track_name}' on Spotify.")
             
+    return singles_df_copy
 
 def delete_all_tracks_from_playlist(SPOTIPY_PLAYLIST_URI, SPOTIPY_USERNAME, SPOTIPY_CLIENT_ID, SPOTIPY_CLIENT_SECRET):
     """
@@ -423,14 +426,14 @@ def remove_already_added_tracks(sorted_df, SPOTIPY_USERNAME, SPOTIPY_PLAYLIST_UR
 if __name__ == "__main__":
     # Set up command-line argument parser
     parser = argparse.ArgumentParser(description='Scrape singles data and create a Spotify playlist.')
-    parser.add_argument('--start_page', type=int, help='Starting page number for scraping', default=1)
-    parser.add_argument('--end_page', type=int, help='Ending page number for scraping', default=20)
-    parser.add_argument('--min_nb_ratings_album', type=int, help='Minimum number of ratings required (album)', default=100)
-    parser.add_argument('--min_nb_ratings_single', type=int, help='Minimum number of ratings required (single)', default=7)
-    parser.add_argument('--min_rating_album', type=int, help='Minimum rating required for the album', default=75)
-    parser.add_argument('--min_rating_single', type=int, help='Minimum rating required for the singles', default=76)
-    parser.add_argument('--min_weighted_single', type=float, help='Minimum weighted average required (single)', default=7.81)
-    parser.add_argument('--min_weighted_album', type=float, help='Minimum weighted average required (album)', default=7.6)
+    parser.add_argument('--start_page', type=int, help='Starting page number for scraping (default: 1)', default=1)
+    parser.add_argument('--end_page', type=int, help='Ending page number for scraping (default: 20)', default=20)
+    parser.add_argument('--min_nb_ratings_album', type=int, help='Minimum number of ratings required (album) (default: 100)', default=100)
+    parser.add_argument('--min_nb_ratings_single', type=int, help='Minimum number of ratings required (single) (default: 7)', default=7)
+    parser.add_argument('--min_rating_album', type=int, help='Minimum rating required for the album (default: 75)', default=75)
+    parser.add_argument('--min_rating_single', type=int, help='Minimum rating required for the singles (default: 76)', default=76)
+    parser.add_argument('--min_weighted_single', type=float, help='Minimum weighted average required (single) (default: 7.81)', default=7.81)
+    parser.add_argument('--min_weighted_album', type=float, help='Minimum weighted average required (album) (default: 7.6)', default=7.6)
 
     args = parser.parse_args()
 
