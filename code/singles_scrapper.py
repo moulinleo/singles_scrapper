@@ -303,7 +303,7 @@ def add_songs_to_playlist(singles_df, SPOTIPY_USERNAME, SPOTIPY_PLAYLIST_URI, SP
             singles_df_copy.drop(index=row.name, inplace=True)
             print(f"Could not find '{artist} - {track_name}' on Spotify.")
             
-    return singles_df_copy
+    return singles_df_copy.iloc[::-1]
 
 def delete_all_tracks_from_playlist(SPOTIPY_PLAYLIST_URI, SPOTIPY_USERNAME, SPOTIPY_CLIENT_ID, SPOTIPY_CLIENT_SECRET):
     """
@@ -427,7 +427,7 @@ if __name__ == "__main__":
     # Set up command-line argument parser
     parser = argparse.ArgumentParser(description='Scrape singles data and create a Spotify playlist.')
     parser.add_argument('--start_page', type=int, help='Starting page number for scraping (default: 1)', default=1)
-    parser.add_argument('--end_page', type=int, help='Ending page number for scraping (default: 20)', default=20)
+    parser.add_argument('--end_page', type=int, help='Ending page number for scraping (default: 10)', default=10)
     parser.add_argument('--min_nb_ratings_album', type=int, help='Minimum number of ratings required (album) (default: 100)', default=100)
     parser.add_argument('--min_nb_ratings_single', type=int, help='Minimum number of ratings required (single) (default: 7)', default=7)
     parser.add_argument('--min_rating_album', type=int, help='Minimum rating required for the album (default: 75)', default=75)
