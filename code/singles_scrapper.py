@@ -86,7 +86,7 @@ def get_dataframe_from_soup(soup, min_nb_ratings, min_rating, min_weighted, base
             continue
         if album_block.find('div', class_='date') is None:
             continue
-        date = album_block.find('div', class_='date').text
+        date = album_block.find('div', class_='type').text
         artist = album_block.find('div', class_='artistTitle').text
         album_title = album_block.find('div', class_='albumTitle').text
         critic_score = album_block.find('div', class_='ratingRowContainer').find_all('div', class_='rating')[0].text
@@ -112,7 +112,7 @@ def get_dataframe_from_soup(soup, min_nb_ratings, min_rating, min_weighted, base
                 # Extract the URL of the album
                 album_url = album_block.find('a', href=True)['href']
                 album_url = f"https://www.albumoftheyear.org{album_url}"
-
+                
                 # Get the HTML content of the album page
                 response = requests.get(album_url, headers=headers) 
                 soup = BeautifulSoup(response.content, 'html.parser')
@@ -177,15 +177,15 @@ def get_dataframe_from_soup(soup, min_nb_ratings, min_rating, min_weighted, base
         'Artist': artists,
         'Album': albums,
         'Rating': ratings,
-        'User_Vote_Count': user_score_counts,
-        'weighted_avg':weighted_scores,
+        'nb_votes': user_score_counts,
+        'weighted':weighted_scores,
     })    
     # Convert to int
     df['Rating'] = df['Rating'].astype(int)  # Convert to float first, as there may be decimal values
-    df['User_Vote_Count'] = df['User_Vote_Count'].astype(int)  # Remove commas and convert to int
+    df['nb_votes'] = df['nb_votes'].astype(int)  # Remove commas and convert to int
     
     # Remove albums with weighted average below the minimum
-    df = df[df['weighted_avg'] >= min_weighted]
+    df = df[df['weighted'] >= min_weighted]
     
     return df
 
@@ -226,7 +226,7 @@ def scrape_multiple_pages(base_url, start_page, end_page, min_nb_ratings, min_ra
             soup = BeautifulSoup(response.content, 'html.parser')
 
             # Get DataFrame from the current page
-            df = get_dataframe_from_soup(soup, min_nb_ratings, min_rating, min_weighted, base_url, headers, min_rating_tracks=80, min_votes_tracks=10, top_songs_keep=3)
+            df = get_dataframe_from_soup(soup, min_nb_ratings, min_rating, min_weighted, base_url, headers, min_rating_tracks=80, min_votes_tracks=7, top_songs_keep=3)
 
             # Append the current DataFrame to the final DataFrame
             final_df = pd.concat([final_df, df], ignore_index=True)
@@ -296,7 +296,7 @@ def add_songs_to_playlist(singles_df, SPOTIPY_USERNAME, SPOTIPY_PLAYLIST_URI, SP
             else:
                 # Remove the row from the DataFrame
                 singles_df_copy.drop(index=row.name, inplace=True)
-                print(f"Skipping '{artist} - {track_name}' (already in the playlist).")
+                # print(f"Skipping '{artist} - {track_name}' (already in the playlist).")
                 
         else:
             # Remove the row from the DataFrame
@@ -384,7 +384,7 @@ def merge_albums_singles(singles_df, albums_df):
     all_df = pd.concat([albums_df, singles_df], ignore_index=True)
     # Convert the 'Date' column to datetime, specifying the year as 2024
     all_df['time_stamp_date'] = pd.to_datetime(all_df['Date'] + ', 2024', format='%b %d, %Y')
-    sorted_df = all_df.sort_values(by=['time_stamp_date', 'weighted_avg'], ascending=[False, False])
+    sorted_df = all_df.sort_values(by=['time_stamp_date', 'weighted'], ascending=[False, False])
     sorted_df = sorted_df.drop(columns=['time_stamp_date'])
     return sorted_df
 
@@ -428,12 +428,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Scrape singles data and create a Spotify playlist.')
     parser.add_argument('--start_page', type=int, help='Starting page number for scraping (default: 1)', default=1)
     parser.add_argument('--end_page', type=int, help='Ending page number for scraping (default: 10)', default=10)
-    parser.add_argument('--min_nb_ratings_album', type=int, help='Minimum number of ratings required (album) (default: 100)', default=100)
-    parser.add_argument('--min_nb_ratings_single', type=int, help='Minimum number of ratings required (single) (default: 7)', default=7)
-    parser.add_argument('--min_rating_album', type=int, help='Minimum rating required for the album (default: 75)', default=75)
-    parser.add_argument('--min_rating_single', type=int, help='Minimum rating required for the singles (default: 76)', default=76)
-    parser.add_argument('--min_weighted_single', type=float, help='Minimum weighted average required (single) (default: 7.81)', default=7.81)
-    parser.add_argument('--min_weighted_album', type=float, help='Minimum weighted average required (album) (default: 7.6)', default=7.6)
+    parser.add_argument('--votes_album', type=int, help='Minimum number of ratings required (album) (default: 60)', default=60)
+    parser.add_argument('--votes_single', type=int, help='Minimum number of ratings required (single) (default: 7)', default=7)
+    parser.add_argument('--rating_album', type=int, help='Minimum rating required for the album (default: 74)', default=74)
+    parser.add_argument('--rating_single', type=int, help='Minimum rating required for the singles (default: 76)', default=76)
+    parser.add_argument('--weighted_single', type=float, help='Minimum weighted average required (single) (default: 7.77)', default=7.77)
+    parser.add_argument('--weighted_album', type=float, help='Minimum weighted average required (album) (default: 7.6)', default=7.6)
 
     args = parser.parse_args()
 
@@ -441,12 +441,12 @@ if __name__ == "__main__":
     base_url = 'https://www.albumoftheyear.org/releases/singles/'
     
     print('1 ****** scrapping singles...')
-    singles_df = scrape_multiple_pages(base_url, args.start_page, args.end_page, args.min_nb_ratings_single, args.min_rating_single, args.min_weighted_single)
+    singles_df = scrape_multiple_pages(base_url, args.start_page, args.end_page, args.votes_single, args.rating_single, args.weighted_single)
     
 
     print('2 ****** scrapping albums...')
     base_url = 'https://www.albumoftheyear.org/releases/'
-    albums_df = scrape_multiple_pages(base_url, args.start_page, args.end_page, args.min_nb_ratings_album, args.min_rating_album, args.min_weighted_album)
+    albums_df = scrape_multiple_pages(base_url, args.start_page, args.end_page, args.votes_album, args.rating_album, args.weighted_album)
     
     # Merge albums and singles
     sorted_df = merge_albums_singles(singles_df, albums_df)
@@ -468,7 +468,7 @@ if __name__ == "__main__":
     # Add new songs to the playlist
     new_songs_spotify = add_songs_to_playlist(new_songs, SPOTIPY_USERNAME, SPOTIPY_PLAYLIST_URI, SPOTIPY_CLIENT_ID, SPOTIPY_CLIENT_SECRET, cache_path=cache_path)
     
-    if new_songs_spotify is not None:
-        print(new_songs_spotify.head(30))
-    else:
+    if new_songs_spotify.empty:        
         print('No new songs to add to the playlist.')
+    else:
+        print(new_songs_spotify.head(30))
